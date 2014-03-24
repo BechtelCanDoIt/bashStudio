@@ -7,14 +7,15 @@
 
 #descrption
 warning! this is POC. Bash studio can create projects for wso2 dev studio or build .car fom that projects.
-1. Make project file structure
-create folder structure for the project, and files: pom.xml, .project
+
+1. Make project file structure. 
+create files: pom.xml, .project and folder structure for the project
 
 2.Make or recreate artifact.xml
-after add some files in project you most rebuld or generate artifact.xml 
+after add some files in project you must rebuild or generate artifact.xml 
 
 3.Build Carbon App (CAR) Archive form project folder
-buld car file that can be uploaded on wso2 esb
+build car file that can be uploaded on wso2 esb
 
 4.Clear screen
 just clear sreen and show menu.
@@ -28,7 +29,7 @@ razblade@gmail.com
 #license
 The MIT License (MIT)
 
-Copyright (c) 2012,2013
+Copyright (c) 2012,2013,2014
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
