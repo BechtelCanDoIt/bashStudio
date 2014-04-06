@@ -1,44 +1,39 @@
 #!/bin/bash
 show_menu(){
-    NORMAL=`echo "\033[m"`
-    MENU=`echo "\033[36m"` #Blue
-    NUMBER=`echo "\033[33m"` #yellow
-    FGRED=`echo "\033[41m"`
-    RED_TEXT=`echo "\033[31m"`
-    ENTER_LINE=`echo "\033[33m"`
+    NORMAL=`echo -e "\033[m"`
+    MENU=`echo -e "\033[36m"` #Blue
+    NUMBER=`echo -e "\033[33m"` #yellow
+    FGRED=`echo -e "\e[0;31m"`
+    RED_TEXT=`echo -e "\033[31m"`
+    ENTER_LINE=`echo -e "\033[33m"`
+
+echo "${NUMBER}
 
 
-    echo "${NUMBER}
-.................                                                                        .................
-.. ..............   ....  ....  ..          .       .  . ..                       . .    . ...............
-..,M,................         .M.                          .7I                    FF     FF .......... . .
-..,M, .  .... .  ,   . . . .. .M. ...              . ...   .FF      ..          . FF      .......   . ....
-..,MNI?MN...MD~=NM   =MO~=N.. .MD?~MN.           .MO~+M.  ~~FF~~~  .FF   FF  :M8=FFM  .~~FF ....:MD:DM ...
-..,M7.  M.       M.  FF .     .M=  ,M.           .M . ..   .FF     .FF   FF  MI   FF     FF ....FF...MZ...
-..,M.   M,  FF=  M,   :FFMN.  .M.  ,M.            ,FFFF    .FF      FF.  FF  M,   FF     FF ....FF...FF ..
-..,MZ  .M .,M,  .M,   .  .M,  .M.  ,M.                FF   .FF      NM. .FF  MZ.  FF     FF ....FF...MI...
-..,M8DDMZ.. FFZMNM,  FFOOFF . .M.  ,M.   . . ... .MOZFF, ...8FFND  .,FFZNFF...FFOFFM .,FFFFFF. ..FFZFF....
- . ..                                    . . ... . ... . ... . ... . ... . ... . ... .  ............... ..
-............      ... .  .  project generator for wso2 dev studio & car builder  .      -9................
-  .....                                                                                    ..............
+██████╗  █████╗ ███████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+██╔══██╗██╔══██╗██╔════╝██║  ██║    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██╔══██╗██║██╔═══██╗
+██████╔╝███████║███████╗███████║    ███████╗   ██║    ╚████╔╝ ██║  ██║██║██║   ██║
+██╔══██╗██╔══██║╚════██║██╔══██║    ╚════██║   ██║     ╚██╔╝  ██║  ██║██║██║   ██║
+██████╔╝██║  ██║███████║██║  ██║    ███████║   ██║      ██║   ██████╔╝██║╚██████╔╝
+╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚═════╝ ╚═╝ ╚═════╝ 
+
+project generator for wso2 dev studio & car builder 
 ${NORMAL}"
 
-
-    echo "${MENU}************************************************************************${NORMAL}"
-    echo "${MENU}*${NUMBER} 1)${MENU} Make project file structure ${NORMAL}"
-    echo "${MENU}*${NUMBER} 2)${MENU} Make or recreate artifact.xml ${NORMAL}"
-    echo "${MENU}*${NUMBER} 3)${MENU} Build Carbon App (CAR) Archive form project folder ${NORMAL}"
-    echo "${MENU}*${NUMBER} 4)${MENU} Clear screen ${NORMAL}"
-    echo "${MENU}*${NUMBER} 5)${MENU} Exit ${NORMAL}"
-    echo "${MENU}************************************************************************${NORMAL}"
-    echo "${ENTER_LINE}Please enter a menu option and enter or ${RED_TEXT}enter to exit. ${NORMAL}"
+    echo "${MENU}---------------------------------------------------------------${NORMAL}"
+    echo "${MENU}|${NUMBER} 1)${MENU} Make project file structure ${NORMAL}"
+    echo "${MENU}|${NUMBER} 2)${MENU} Make or recreate artifact.xml ${NORMAL}"
+    echo "${MENU}|${NUMBER} 3)${MENU} Build Carbon App (CAR) Archive form project folder ${NORMAL}"
+    echo "${MENU}|${NUMBER} *)${MENU} Exit ${NORMAL}"
+    echo "${MENU}---------------------------------------------------------------${NORMAL}"
+    echo -n "${ENTER_LINE}Please enter a menu option and enter or ${RED_TEXT}else to exit.:${NORMAL}"
     read opt
 }
 option_picked() {
     COLOR='\033[01;31m' # bold red
     RESET='\033[00;00m' # normal white
     MESSAGE=${@:-${RESET}"Error: No message passed"}
-    echo "${COLOR}${MESSAGE}${RESET}"
+    echo -e "${COLOR}${MESSAGE}${RESET}"
 }
 
 clear
@@ -248,12 +243,16 @@ while [ opt != '' ]
 
         3) clear;
             option_picked "CAR bulider";
-            echo -n 'Enter path to project folderand press [ENTER]:'
-        	read PATHTOPROJECT;
-        	echo -n 'Enter car name and press [ENTER]:'
-        	read CARNAME;
+            # echo -n 'Enter path to project folderand press [ENTER]:'
+        	read -e -p 'Enter path to project folderand press [ENTER]:' PATHTOPROJECT;
+        	# echo -n 'Enter car name and press [ENTER]:'
+        	read -e -p 'Enter car name and press [ENTER]:' CARNAME;
         	echo -n 'Enter car version and press [ENTER]:'
         	read CARVERSION;
+        	echo -n 'Enable tracing for all proxies. default n [y/n]:'
+        	read TRACING;
+        	echo -n 'Remove all log mediators from all proxies. default n [y/n]:'
+        	read RMLOGGING;
  
             CURRENTPATH=`pwd`;
             PROJECTNAME=`echo $PATHTOPROJECT | awk 'BEGIN { RS = "/" }; END {print $1}'`;
@@ -276,7 +275,24 @@ while [ opt != '' ]
 				echo '<?xml version="1.0" encoding="UTF-8"?><artifact name="'$FNAME'" version="1.0.0" type="synapse/'$TYPE'" serverRole="EnterpriseServiceBus">
 				    <file>'$FNAME'-1.0.0.xml</file>
 				</artifact>' > 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/artifact.xml
+
 				cp $D 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
+
+				if [ "$TRACING" = "y" ] && [ "$TYPE" = "proxy-service" ]
+					then 
+					sed -i.bak -e 's/trace="disable"/trace="enable"/' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
+					rm 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml.bak'
+				fi
+
+				if [ "$RMLOGGING" = "y" ] && [ "$TYPE" = "proxy-service" ]
+					then 
+					sed -i.bak -e '/<log*.>/,/<\/log>/d' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
+					sed -i.bak -e 's/<log.*>//g' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
+					rm 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml.bak'
+				fi
+
+				
+
 			done
 			echo '</artifact></artifacts>' >> 'CARFile_'$CARVERSION/artifacts.xml
 			
@@ -295,3 +311,4 @@ while [ opt != '' ]
     esac
 fi
 done
+
