@@ -17,7 +17,7 @@ echo "${NUMBER}
 ██████╔╝██║  ██║███████║██║  ██║    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
 ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝                                                                                 
 
-project generator for wso2 dev studio & car builder 
+project generator for wso2 dev studio & car builder. v:0.0.3
 ${NORMAL}"
 
     echo "${MENU}---------------------------------------------------------------${NORMAL}"
@@ -215,8 +215,7 @@ while [ opt != '' ]
 
         2)  clear;
             option_picked "Make or recreate artifact.xml";
-            echo -n "Enter path to your project and press [ENTER]:"
-            read PATHTOPROJECT
+            read -e -p 'Enter path to your project and press [ENTER]:' PATHTOPROJECT;
             CURRENTPATH=`pwd`;
             PROJECTNAME=`echo $PATHTOPROJECT | awk 'BEGIN { RS = "/" }; END {print $1}'`;
             cd $PATHTOPROJECT;
@@ -241,10 +240,10 @@ while [ opt != '' ]
         show_menu;
             ;;
 
-        3) clear;
+       3) clear;
             option_picked "CAR bulider";
             # echo -n 'Enter path to project folderand press [ENTER]:'
-        	read -e -p 'Enter path to project folderand press [ENTER]:' PATHTOPROJECT;
+        	read -e -p 'Enter path to project folder and press [ENTER]:' PATHTOPROJECT;
         	# echo -n 'Enter car name and press [ENTER]:'
         	read -e -p 'Enter car name and press [ENTER]:' CARNAME;
         	echo -n 'Enter car version and press [ENTER]:'
@@ -270,25 +269,25 @@ while [ opt != '' ]
 				PATCHSTR='./'
 				PATHTOXML=`echo $D | sed 's/^.\///g'`;
 				TYPE=`echo $FOLDERNAME | sed 's/local-entries/local-entry/g;s/proxy-services/proxy-service/g;s/sequences/sequence/g;s/endpoints/endpoint/g;s/tasks/task/g;s/templates/template/g;'`
-				echo '<dependency artifact="'$FNAME'" version="1.0.0" include="true" serverRole="EnterpriseServiceBus"/>' >> 'CARFile_'$CARVERSION/artifacts.xml
-				mkdir 'CARFile_'$CARVERSION/$FNAME'_1.0.0';
-				echo '<?xml version="1.0" encoding="UTF-8"?><artifact name="'$FNAME'" version="1.0.0" type="synapse/'$TYPE'" serverRole="EnterpriseServiceBus">
-				    <file>'$FNAME'-1.0.0.xml</file>
-				</artifact>' > 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/artifact.xml
+				echo '<dependency artifact="'$FNAME'" version="'$CARVERSION'" include="true" serverRole="EnterpriseServiceBus"/>' >> 'CARFile_'$CARVERSION/artifacts.xml
+				mkdir 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION;
+				echo '<?xml version="1.0" encoding="UTF-8"?><artifact name="'$FNAME'" version="'$CARVERSION'" type="synapse/'$TYPE'" serverRole="EnterpriseServiceBus">
+				    <file>'$FNAME'-'$CARVERSION'.xml</file>
+				</artifact>' > 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/artifact.xml
 
-				cp $D 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
+				cp $D 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
 
 				if [ "$TRACING" = "y" ] && [ "$TYPE" = "proxy-service" ]
 					then 
-					sed -i.bak -e 's/trace="disable"/trace="enable"/' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
-					rm 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml.bak'
+					sed -i.bak -e 's/trace="disable"/trace="enable"/' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
+					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml.bak'
 				fi
 
 				if [ "$RMLOGGING" = "y" ] && [ "$TYPE" = "proxy-service" ]
 					then 
 					sed -i.bak -e '/<log*.>/,/<\/log>/d' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
-					sed -i.bak -e 's/<log.*>//g' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
-					rm 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml.bak'
+					sed -i.bak -e 's/<log.*>//g' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
+					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml.bak'
 				fi
 
 				
@@ -303,6 +302,7 @@ while [ opt != '' ]
 			cd $CURRENTPATH;
         	show_menu;
             ;;
+
 
         *)clear;
         
