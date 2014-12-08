@@ -17,11 +17,11 @@ echo "${NUMBER}
 ██████╔╝██║  ██║███████║██║  ██║    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
 ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝                                                                                 
 
-project generator for wso2 dev studio & car builder. v:0.0.3
+project generator for wso2 developer studio & carbon app builder. v:0.0.4
 ${NORMAL}"
 
     echo "${MENU}---------------------------------------------------------------${NORMAL}"
-    echo "${MENU}|${NUMBER} 1)${MENU} Make project file structure ${NORMAL}"
+    echo "${MENU}|${NUMBER} 1)${MENU} Make wso2esb project file structure ${NORMAL}"
     echo "${MENU}|${NUMBER} 2)${MENU} Make or recreate artifact.xml ${NORMAL}"
     echo "${MENU}|${NUMBER} 3)${MENU} Build Carbon App (CAR) Archive form project folder ${NORMAL}"
     echo "${MENU}|${NUMBER} *)${MENU} Exit ${NORMAL}"
@@ -51,6 +51,7 @@ while [ opt != '' ]
     	mkdir $PROJECTNAME
     	mkdir $PROJECTNAME/src
     	mkdir $PROJECTNAME/src/main
+    	mkdir $PROJECTNAME/src/main/dataservice
     	mkdir $PROJECTNAME/src/main/synapse-config
     	mkdir $PROJECTNAME/src/main/synapse-config/api
     	mkdir $PROJECTNAME/src/main/synapse-config/endpoints
@@ -220,37 +221,49 @@ while [ opt != '' ]
             PROJECTNAME=`echo $PATHTOPROJECT | awk 'BEGIN { RS = "/" }; END {print $1}'`;
             cd $PATHTOPROJECT;
 			echo '<?xml version="1.0" encoding="UTF-8"?><artifacts>' > artifact.xml
-			for D in `find . -name '*.xml' ! -name 'pom.xml' ! -name 'artifact.xml'`
+			for D in `find . -name '*.xml' ! -name 'pom.xml' ! -name 'artifact.xml' -o  -name '*.dbs'`
 			do
 				#Get full filename
 				echo 'add:'$D
 				FILENAME=`echo $D | awk 'BEGIN { RS = "/" }; END {print $1}'`;
 				FOLDERNAME=`echo $D | awk -F'/[^/]*$' '{print $1}' | awk 'BEGIN { RS = "/" }; END {print $1}'`;
-				FNAME=`echo $FILENAME | awk 'BEGIN {FS = ".xml"}; END {print $1}'`;
+				FILEEXTENSION=`echo $FILENAME | awk -F . '{if (NF>1) {print $NF}}'`;
+				FNAME=`echo $FILENAME | awk 'BEGIN {FS = ".xml"}; END {print $1}' | awk 'BEGIN {FS = ".dbs"}; END {print $1}'`;
+				if [ "$FOLDERNAME" = "dataservice" ]
+					then
+						PROTOTYPE='service';
+						SERVERROLE='EnterpriseServiceBus'; #if you use dss features in esb, but if you use standalone dss set this property to DataServicesServer
+
+					else
+						PROTOTYPE='synapse';
+						SERVERROLE='EnterpriseServiceBus';
+				fi
 				PATCHSTR='./'
 				PATHTOXML=`echo $D | sed 's/^.\///g'`;
 				TYPE=`echo $FOLDERNAME | sed 's/local-entries/local-entry/g;s/proxy-services/proxy-service/g;s/sequences/sequence/g;s/endpoints/endpoint/g;s/tasks/task/g;s/templates/template/g;'`
-				echo '			    <artifact name="'$FNAME'" groupId="com.example.'$PROJECTNAME'.'$TYPE'" version="1.0.0" type="synapse/'$TYPE'" serverRole="EnterpriseServiceBus">
+				echo '			    <artifact name="'$FNAME'" groupId="com.example.'$PROJECTNAME'.'$TYPE'" version="1.0.0" type="'$PROTOTYPE'/'$TYPE'" serverRole="'$SERVERROLE'">
 			        <file>'$PATHTOXML'</file>
 			    </artifact>' >> artifact.xml
 			done
 			echo '</artifacts>' >> artifact.xml
 			cd $CURRENTPATH;
 			option_picked "artifact.xml is done";
-        show_menu;
-            ;;
+			show_menu;
+			;;
 
        3) clear;
             option_picked "CAR bulider";
-            # echo -n 'Enter path to project folderand press [ENTER]:'
+
         	read -e -p 'Enter path to project folder and press [ENTER]:' PATHTOPROJECT;
-        	# echo -n 'Enter car name and press [ENTER]:'
-        	read -e -p 'Enter car name and press [ENTER]:' CARNAME;
-        	echo -n 'Enter car version and press [ENTER]:'
-        	read CARVERSION;
-        	echo -n 'Enable tracing for all proxies. default n [y/n]:'
+        	TEMPPROJECTNAME=`echo $PATHTOPROJECT | sed 's/\///g';`;
+        	read -e -p 'Enter car name and press [ENTER] default is "'$TEMPPROJECTNAME'":' CARNAME;
+        	CARNAME=${CARNAME:-$(echo $TEMPPROJECTNAME)}
+        	TEMPVERSION='0.0.'$(find dssapi/ -mindepth 1 -maxdepth 1 -type d -path '*CARFile*' | wc -l);
+        	read -p 'Enter car version and press [ENTER] default is "'$TEMPVERSION'" :' CARVERSION
+        	CARVERSION=${CARVERSION:-$TEMPVERSION};
+        	echo -n 'Enable tracing for all proxy services. default n [y/n]:'
         	read TRACING;
-        	echo -n 'Remove all log mediators from all proxies. default n [y/n]:'
+        	echo -n 'Remove all log mediators from all proxy services. default n [y/n]:'
         	read RMLOGGING;
  
             CURRENTPATH=`pwd`;
@@ -259,35 +272,44 @@ while [ opt != '' ]
             mkdir 'CARFile_'$CARVERSION
 			echo '<?xml version="1.0" encoding="UTF-8"?><artifacts>' > 'CARFile_'$CARVERSION/artifacts.xml
 			echo '<artifact name="'$CARNAME'" version="'$CARVERSION'" type="carbon/application">' >> 'CARFile_'$CARVERSION/artifacts.xml
-			for D in `find . -name '*.xml' ! -name 'pom.xml' ! -name 'artifact.xml' ! -name 'artifacts.xml' ! -path '*CARFile*'`
+			for D in `find . -name '*.xml' ! -name 'pom.xml' ! -name 'artifact.xml' ! -name 'artifacts.xml' ! -path '*CARFile*' -o -name '*.dbs' ! -path '*CARFile*'`
 			do
 				#Get full filename
 				echo 'add:'$D
 				FILENAME=`echo $D | awk 'BEGIN { RS = "/" }; END {print $1}'`;
 				FOLDERNAME=`echo $D | awk -F'/[^/]*$' '{print $1}' | awk 'BEGIN { RS = "/" }; END {print $1}'`;
-				FNAME=`echo $FILENAME | awk 'BEGIN {FS = ".xml"}; END {print $1}'`;
+				FILEEXTENSION=`echo $FILENAME | awk -F . '{if (NF>1) {print $NF}}'`;
+				FNAME=`echo $FILENAME | awk 'BEGIN {FS = ".xml"}; END {print $1}' | awk 'BEGIN {FS = ".dbs"}; END {print $1}'`;
+				if [ "$FOLDERNAME" = "dataservice" ]
+					then
+						PROTOTYPE='service';
+						SERVERROLE='EnterpriseServiceBus'; #if you use dss features in esb, but if you use standalone dss set this property to DataServicesServer
+					else
+						PROTOTYPE='synapse';
+						SERVERROLE='EnterpriseServiceBus';
+				fi
 				PATCHSTR='./'
 				PATHTOXML=`echo $D | sed 's/^.\///g'`;
 				TYPE=`echo $FOLDERNAME | sed 's/local-entries/local-entry/g;s/proxy-services/proxy-service/g;s/sequences/sequence/g;s/endpoints/endpoint/g;s/tasks/task/g;s/templates/template/g;'`
 				echo '<dependency artifact="'$FNAME'" version="'$CARVERSION'" include="true" serverRole="EnterpriseServiceBus"/>' >> 'CARFile_'$CARVERSION/artifacts.xml
 				mkdir 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION;
-				echo '<?xml version="1.0" encoding="UTF-8"?><artifact name="'$FNAME'" version="'$CARVERSION'" type="synapse/'$TYPE'" serverRole="EnterpriseServiceBus">
-				    <file>'$FNAME'-'$CARVERSION'.xml</file>
+				echo '<?xml version="1.0" encoding="UTF-8"?><artifact name="'$FNAME'" version="'$CARVERSION'" type="'$PROTOTYPE'/'$TYPE'" serverRole="'$SERVERROLE'">
+				    <file>'$FNAME'-'$CARVERSION'.'$FILEEXTENSION'</file>
 				</artifact>' > 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/artifact.xml
 
-				cp $D 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
+				cp $D 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION
 
 				if [ "$TRACING" = "y" ] && [ "$TYPE" = "proxy-service" ]
 					then 
-					sed -i.bak -e 's/trace="disable"/trace="enable"/' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
-					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml.bak'
+					sed -i.bak -e 's/trace="disable"/trace="enable"/' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION
+					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION'.bak'
 				fi
 
 				if [ "$RMLOGGING" = "y" ] && [ "$TYPE" = "proxy-service" ]
 					then 
-					sed -i.bak -e '/<log*.>/,/<\/log>/d' 'CARFile_'$CARVERSION/$FNAME'_1.0.0'/$FNAME'-1.0.0.xml'
-					sed -i.bak -e 's/<log.*>//g' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml'
-					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.xml.bak'
+					sed -i.bak -e '/<log*.>/,/<\/log>/d' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION
+					sed -i.bak -e 's/<log.*>//g' 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION
+					rm 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION/$FNAME'-'$CARVERSION'.'$FILEEXTENSION'.bak'
 				fi
 
 				
