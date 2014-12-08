@@ -6,7 +6,9 @@
 4. license
 
 #descrption
-warning! this is POC. Bash studio can create projects for wso2 dev studio or build .car from that projects.
+POC. Bash studio can create projects for wso2 dev studio or build .car (Carbon application) from that projects.
+CAR builder support wso2 ESB artifacts (api, proxy services, local-entries, endpoints) and DSS features (dbs files)
+
 
 1. Make project file structure. 
 create files: pom.xml, .project and folder structure for the project
@@ -17,8 +19,9 @@ after add some files in project you must rebuild or generate artifact.xml
 3.Build Carbon App (CAR) Archive form project folder
 build car file that can be uploaded on wso2 esb
 
-#requirements
-bash, awk, sed. 
+#system requirements
+OS: Linux, Windows with cygwin
+shell requirements: bash, awk, sed, zip, find
 
 #contact
 razblade@gmail.com
