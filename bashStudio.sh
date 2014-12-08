@@ -258,7 +258,7 @@ while [ opt != '' ]
         	TEMPPROJECTNAME=`echo $PATHTOPROJECT | sed 's/\///g';`;
         	read -e -p 'Enter car name and press [ENTER] default is "'$TEMPPROJECTNAME'":' CARNAME;
         	CARNAME=${CARNAME:-$(echo $TEMPPROJECTNAME)}
-        	TEMPVERSION='0.0.'$(find dssapi/ -mindepth 1 -maxdepth 1 -type d -path '*CARFile*' | wc -l);
+        	TEMPVERSION='0.0.'$(find $PATHTOPROJECT -mindepth 1 -maxdepth 1 -type d -path '*CARFile*' | wc -l);
         	read -p 'Enter car version and press [ENTER] default is "'$TEMPVERSION'" :' CARVERSION
         	CARVERSION=${CARVERSION:-$TEMPVERSION};
         	echo -n 'Enable tracing for all proxy services. default n [y/n]:'
