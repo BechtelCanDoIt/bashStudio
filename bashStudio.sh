@@ -238,7 +238,6 @@ while [ opt != '' ]
 						PROTOTYPE='synapse';
 						SERVERROLE='EnterpriseServiceBus';
 				fi
-				PATCHSTR='./'
 				PATHTOXML=`echo $D | sed 's/^.\///g'`;
 				TYPE=`echo $FOLDERNAME | sed 's/local-entries/local-entry/g;s/proxy-services/proxy-service/g;s/sequences/sequence/g;s/endpoints/endpoint/g;s/tasks/task/g;s/templates/template/g;'`
 				echo '			    <artifact name="'$FNAME'" groupId="com.example.'$PROJECTNAME'.'$TYPE'" version="1.0.0" type="'$PROTOTYPE'/'$TYPE'" serverRole="'$SERVERROLE'">
@@ -288,8 +287,6 @@ while [ opt != '' ]
 						PROTOTYPE='synapse';
 						SERVERROLE='EnterpriseServiceBus';
 				fi
-				PATCHSTR='./'
-				PATHTOXML=`echo $D | sed 's/^.\///g'`;
 				TYPE=`echo $FOLDERNAME | sed 's/local-entries/local-entry/g;s/proxy-services/proxy-service/g;s/sequences/sequence/g;s/endpoints/endpoint/g;s/tasks/task/g;s/templates/template/g;'`
 				echo '<dependency artifact="'$FNAME'" version="'$CARVERSION'" include="true" serverRole="EnterpriseServiceBus"/>' >> 'CARFile_'$CARVERSION/artifacts.xml
 				mkdir 'CARFile_'$CARVERSION/$FNAME'_'$CARVERSION;
